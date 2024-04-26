@@ -5,7 +5,7 @@ import nltk
 import keras
 from keras.preprocessing.sequence import pad_sequences
 
-dataFrame = pd.read_csv('/brown.csv')
+dataFrame = pd.read_csv('brown.csv')
 sentences = dataFrame['tokenized_text']
 
 documents = []
