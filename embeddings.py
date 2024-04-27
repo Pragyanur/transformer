@@ -5,6 +5,8 @@ import nltk
 import keras
 from keras.preprocessing.sequence import pad_sequences
 
+TF_ENABLE_ONEDNN_OPTS=0
+
 dataFrame = pd.read_csv('brown.csv')
 sentences = dataFrame['tokenized_text']
 
@@ -18,16 +20,18 @@ for s in sentences:
     vocabulary.extend(words)
 
 vocabulary = set(vocabulary)
-vocabulary_size = len(vocabulary)
+VOCABULARY_SIZE = len(vocabulary)
 
 word2idx = {word: idx for idx, word in enumerate(vocabulary)}
-idx2word = {idx: word for idx, word in enumerate(vocabulary)}
+idx2word = dict(enumerate(vocabulary))
+
+# print(word2idx[str(idx2word[0])], idx2word[0])
 
 # Generate training data
-window_size = 10
+WINDOW_SIZE = 10
 for sentence in documents:
     for i, target_word in enumerate(sentence):
-        context_words = [sentence[j] for j in range(max(0, i - window_size), min(i + window_size + 1,len(sentence) )) if j>=0 and j != i]
+        context_words = [sentence[j] for j in range(max(0, i - WINDOW_SIZE), min(i + WINDOW_SIZE + 1,len(sentence) )) if j>=0 and j != i]
         train_data.append((context_words, target_word))
 
 # print(train_data[0:3])
@@ -42,15 +46,15 @@ for context_words, target_word in train_data:
 # print(train_inputs, train_labels)
 
 # Convert to numpy arrays
-train_inputs = pad_sequences(train_inputs, maxlen=window_size*2)
+train_inputs = pad_sequences(train_inputs, maxlen=WINDOW_SIZE*2)
 train_labels = np.array(train_labels)
 
 # Define CBOW model
-embedding_dim = 10
+EMBEDDING_DIM = 10
 cbow_model = keras.Sequential([
-    keras.layers.Embedding(input_dim=vocabulary_size, output_dim=embedding_dim),
+    keras.layers.Embedding(input_dim=VOCABULARY_SIZE, output_dim=EMBEDDING_DIM),
     keras.layers.Flatten(),
-    keras.layers.Dense(units=vocabulary_size, activation='softmax')
+    keras.layers.Dense(units=VOCABULARY_SIZE, activation='softmax')
 ])
 
 # Compile and train the CBOW model
